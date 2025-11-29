@@ -1,24 +1,35 @@
-const express = require('express');
-const dotenv = require('dotenv');
+const express = require("express");
 const app = express();
-dotenv.config();
-const generateText1  = require("./controllers/textController1");
-const generateText2  = require("./controllers/textController2");
+const tourRouter = require("./routes/tourRouter");
+const userRouter = require("./routes/userRouter");
+const { unknownEndpoint } = require("./middleware/customMiddleware");
 
+const morgan = require("morgan");
+app.use(morgan("dev"));
 
+// Middleware to parse JSON
 app.use(express.json());
+ 
+// Use the tourRouter for all "/tours" routes
+app.use("/api/tours", tourRouter);
 
-app.get("/", (req, res) => {
-  res.send("API is running");
-});
+// Use the userRouter for all /users routes
+app.use("/api/users", userRouter);
 
-app.post('/api/generate-text1',generateText1 );
-app.post('/api/generate-text2',generateText2 );
-
+app.use(unknownEndpoint);
+// app.use(errorHandler);
 
 const port = process.env.PORT || 4000;
+// Start the server
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+  console.log(`Server is running on http://localhost:${port}`);
 
-// npm install express dotenv multer @google/genai
+  const connectDB = require("./config/db");
+
+// connect to MongoDB before starting the server
+connectDB();
+
+
+
+});
+ 
